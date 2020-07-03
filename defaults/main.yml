@@ -18,3 +18,7 @@ vim_start_removed_plugins: []
 vim_opt_removed_plugins: []
 # - vdebug
 vim_dotfiles: []
+
+# users
+vim_users: []
+vim_users_host_vars: []

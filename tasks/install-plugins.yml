@@ -4,16 +4,18 @@
 - name: Clone {{ plugin_data.type }} plugins into place.
   git:
     clone: true
-    dest: "{{ vim_plugin_parent_directory }}/{{ plugin_data.directory }}/{{ (plugin.repo | basename | splitext)[0] }}"
+    dest: "{{ '/home/' if (plugin.1!='root') else '/' }}{{ plugin.1 }}/.vim/pack/{{ plugin_data.directory }}/{{ (plugin.0.repo | basename | splitext)[0] }}"
     # When updating, do so even if there are local changes to the repo (this
     # happens when we generate helptags for Vim).
     force: true
-    repo: "{{ plugin.repo }}"
+    repo: "{{ plugin.0.repo }}"
     # Update when needed (in practice, this will happen only when 'version' is
     # set to 'master' or 'HEAD').
     update: true
     version: "{{ plugin.version | default('HEAD') }}"
-  loop: "{{ plugin_data.list }}"
+  become: true
+  become_user: "{{ plugin.1 }}"
+  loop: "{{ plugin_data.list | product( plugin_data.users ) | list }}"
   loop_control:
     loop_var: plugin
   tags:
@@ -22,8 +24,10 @@
 - name: Create/update helptags for {{ plugin_data.type }} plugins.
   shell: "vim -c 'helptags .' -c q"
   args:
-    chdir: "{{ vim_plugin_parent_directory }}/{{ plugin_data.directory }}/{{ (plugin.repo | basename | splitext)[0] }}/doc"
-  loop: "{{ plugin_data.list }}"
+    chdir: "{{ '/home/' if (plugin.1!='root') else '/' }}{{ plugin.1 }}/.vim/pack/{{ plugin_data.directory }}/{{ (plugin.0.repo | basename | splitext)[0] }}/doc"
+  become: true
+  become_user: "{{ plugin.1 }}"
+  loop: "{{ plugin_data.list | product( plugin_data.users ) | list }}"
   loop_control:
     loop_var: plugin
   tags:

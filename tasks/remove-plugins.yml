@@ -3,9 +3,11 @@
 
 - name: Remove {{ plugin_data.type }} plugins.
   file:
-    path: "{{ vim_plugin_parent_directory }}/{{ plugin_data.directory }}/{{ plugin }}"
+    path: "{{ '/home/' if (plugin.1!='root') else '/' }}{{ plugin.1 }}/.vim/pack/{{ plugin_data.directory }}/{{ (plugin.0.repo | basename | splitext)[0] }}"
     state: absent
-  loop: "{{ plugin_data.list }}"
+  become: true
+  become_user: "{{ plugin.1 }}"
+  loop: "{{ plugin_data.list | product( plugin_data.users ) | list }}"
   loop_control:
     loop_var: plugin
   tags:

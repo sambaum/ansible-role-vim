@@ -3,10 +3,10 @@
 
 - name: Copy dotfiles into place.
   copy:
-    src: "{{ dotfile }}"
-    dest: "{{ vim_user_home_directory }}/{{ dotfile | basename }}"
-    owner: "{{ vim_owner }}"
-    group: "{{ vim_group }}"
-  loop: "{{ vim_dotfiles }}"
+    src: "{{ dotfile.0 }}"
+    dest: "{{ '/home/' if (dotfile.1!='root') else '/' }}{{ dotfile.1 }}/{{ dotfile.0 | basename }}"
+  become: true
+  become_user: "{{ dotfile.1 }}"
+  loop: "{{ vim_dotfiles | product( vim_users + vim_users_host_vars ) | list }}"
   loop_control:
     loop_var: dotfile
